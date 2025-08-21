@@ -27,6 +27,10 @@
             <td>${board.author}</td>
         </tr>
         <tr>
+            <th>작성자id</th>
+            <td>${board.authorId}</td>
+        </tr>
+        <tr>
             <th>작성일</th>
             <td>${board.createdAt}</td>
         </tr>
@@ -39,6 +43,11 @@
     <p>
         <a href="front?command=boardWrite">글쓰기</a>
         <a href="front?command=boardList">목록</a>
+        <c:if test="${sessionScope.userId == board.authorId}">
+            <a href="front?command=boardUpdate&id=${board.id}">수정</a>
+            <a href="front?command=boardDelete&id=${board.id}"
+               onclick="return confirm('정말 삭제하시겠습니까?')">삭제</a>
+        </c:if>
     </p>
 </c:if>
 </body>

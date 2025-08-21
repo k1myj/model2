@@ -14,7 +14,10 @@ public class HandlerMapping {
         commandMap.put("boardList", new BoardListCommand());
         commandMap.put("boardWrite", new BoardWriteCommand());
         commandMap.put("boardInsert", new BoardInsertCommand());
-        commandMap.put("boardView", new BoardViewCommand());
+        commandMap.put("boardView", new BoardViewCommand());// 기존 코드에 추가
+        commandMap.put("signup", new SignupCommand());
+        commandMap.put("login", new LoginCommand());
+        commandMap.put("logout", new LogoutCommand());
     }
 
     public Command getCommand(String commandName) {

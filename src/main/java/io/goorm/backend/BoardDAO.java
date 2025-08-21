@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.RowMapper;
 import io.goorm.backend.config.DatabaseConfig;
 
 import java.util.List;
+import java.util.ArrayList;
 
 public class BoardDAO {
 
@@ -14,35 +15,57 @@ public class BoardDAO {
         this.jdbcTemplate = new JdbcTemplate(DatabaseConfig.getDataSource());
     }
 
-    // RowMapper 정의
+    // RowMapper 수정
     private RowMapper<Board> boardRowMapper = (rs, rowNum) -> {
         Board board = new Board();
         board.setId(rs.getLong("id"));
         board.setTitle(rs.getString("title"));
-        board.setAuthor(rs.getString("author"));
         board.setContent(rs.getString("content"));
-        board.setCreatedAt(rs.getTimestamp("created_At"));
+        board.setAuthor(rs.getString("author"));
+        board.setAuthorId(rs.getInt("author_id"));
+        board.setAuthorName(rs.getString("author_name"));
+        board.setCreatedAt(rs.getTimestamp("created_at"));
         return board;
     };
-
+    // getBoardList 메서드 수정 (작성자 이름 포함)
     public List<Board> getBoardList() {
-        String sql = "SELECT * FROM board ORDER BY id DESC";
-        return jdbcTemplate.query(sql, boardRowMapper);
+        String sql = "SELECT b.*, u.name as author_name FROM board b " +
+                "LEFT JOIN users u ON b.author_id = u.id " +
+                "ORDER BY b.id DESC";
+        try {
+            return jdbcTemplate.query(sql, boardRowMapper);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
     }
-
     public Board getBoardById(Long id) {
-        String sql = "SELECT * FROM board WHERE id = ?";
+        String sql = "SELECT b.*, u.name as author_name FROM board b " +
+                "LEFT JOIN users u ON b.author_id = u.id " +
+                "WHERE b.id = ?";
         try {
             return jdbcTemplate.queryForObject(sql, boardRowMapper, id);
         } catch (Exception e) {
             return null;
         }
     }
+    public boolean insertBoard(Board board) {
+        String sql = "INSERT INTO board (title, content,author, author_id, created_at) VALUES (?, ?, ?, ?, ?)";
+        try {
+            int result = jdbcTemplate.update(sql,
+                    board.getTitle(),
+                    board.getContent(),
+                    board.getAuthor(),
+                    board.getAuthorId(),
+                    board.getCreatedAt());
 
-    public void insertBoard(Board board) {
-        String sql = "INSERT INTO board (title, Author, content, createdAt) VALUES (?, ?, ?, NOW())";
-        jdbcTemplate.update(sql, board.getTitle(), board.getAuthor(), board.getContent());
+            return result > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
+
     // BoardDAO 클래스에 추가할 메서드
     public List<Board> searchByTitle(String keyword) {
         String sql = "SELECT * FROM board WHERE title LIKE ? ORDER BY id DESC";

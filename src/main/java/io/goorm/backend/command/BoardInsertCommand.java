@@ -6,7 +6,10 @@ import io.goorm.backend.BoardDAO;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.sql.Timestamp;
 
 /**
  * 게시글 등록 처리 Servlet
@@ -23,6 +26,7 @@ public class BoardInsertCommand implements Command {
             String title = request.getParameter("title");
             String writer = request.getParameter("writer");
             String content = request.getParameter("content");
+            HttpSession session = request.getSession(false);
 
             if (title == null || title.trim().isEmpty()) {
                 request.setAttribute("error", "제목을 입력해주세요.");
@@ -36,6 +40,9 @@ public class BoardInsertCommand implements Command {
             board.setTitle(title);
             board.setAuthor(writer);
             board.setContent(content);
+            board.setAuthorId(((Long) session.getAttribute("userId")).intValue());
+            board.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+
 
             BoardDAO dao = new BoardDAO();
             dao.insertBoard(board);
